@@ -24,9 +24,7 @@ moment = Moment(app)
 app.config.from_object('config')
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
-# TODO: connect to a local postgresql database
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgres://postgres@localhost:5432/fyyur'
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
 #----------------------------------------------------------------------------#
 # Models.
 #----------------------------------------------------------------------------#
@@ -136,16 +134,22 @@ def venues():
 @app.route('/venues/search', methods=['POST'])
 def search_venues():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
-  # seach for Hop should return "The Musical Hop".
+  # search for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
-  response={
-    "count": 1,
-    "data": [{
-      "id": 2,
-      "name": "The Dueling Pianos Bar",
-      "num_upcoming_shows": 0,
-    }]
-  }
+  search_venue = request.form.get('search_term')
+  venues = Venue.query.filter(Venue.name.ilike('%{}%'.format(search_venue))).all()
+  data = []
+  for venue in venues:
+      keep = {}
+      keep['id'] = venue.id
+      keep['name'] = venue.name
+      keep['num_upcoming_shows'] = venue.shows.count()
+      data.append(keep)
+
+  response = {}
+  response['count'] = len(data)
+  response['data'] = data
+
   return render_template('pages/search_venues.html', results=response, search_term=request.form.get('search_term', ''))
 
 @app.route('/venues/<int:venue_id>')
@@ -194,16 +198,23 @@ def create_venue_submission():
                 seeking_talent=seeking_talent,
                 seeking_description=seeking_description,
             )
-            Venue.insert(new_venue)
-            flash('Venue ' + request.form['name'] + ' was successfully listed!')
-        except SQLAlchemyError as e:
-            print(e)
+            db.session.add(new_venue)
+            db.session.commit()
+        except:
+            error = True
+            db.session.rollback()
+            print(sys.exc_info())
+        finally:
+            db.session.close()
+            if error:
+                flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
+            else:
+                flash('Venue ' + request.form['name'] + ' was successfully listed!')
+            return render_template('pages/home.html')
+
             # TODO: on unsuccessful db insert, flash an error instead.
             # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
             # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-            flash('An error occurred. Venue ' + request.form['name'] + ' could not be listed.')
-    return render_template('pages/home.html')
-
 @app.route('/venues/<venue_id>', methods=['DELETE'])
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
@@ -256,16 +267,25 @@ def search_artists():
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band
   try:
-      name = request.form['name']
-      search = "%{}%".format(name)
-      response = db.session.query(Artist).filter(Artist.name.ilike(search)).all()
+      search_artist = request.form.get('search_term')
+      s_artist = Artist.query.filter(Artist.name.ilike('%{}%'.format(search_artist))).all()
+      data = []
+      for artist in s_artist:
+          keep_ar = {}
+          keep_ar['id'] = artist.id
+          keep_ar['name'] = artist.name
+          keep_ar['num_upcoming_shows'] = artist.shows.count()
+          data.append(keep_ar)
+
+      response = {}
+      response['count'] = len(s_artist)
+      response['data'] = data
   except:
       error = True
       print(sys.exc_info())
       flash('An error occurred. Artist\'s could not be found')
 
-
-  return render_template('pages/search_artists.html', results=response, search_term=request.form.get('search_term', ''))
+  return render_template('pages/search_artists.html', results=response, search_artist=request.form.get('search_term', ''))
 
 @app.route('/artists/<int:artist_id>')
 def show_artist(artist_id):
@@ -362,26 +382,34 @@ def create_artist_submission():
   # TODO: modify data to be the data object returned from db insertion
   form = ArtistForm(request.form)
   if form.validate():
-      try:
-          print("HI")
-          new_artist = Artist(
-          name=request.form['name'],
-          city=request.form['city'],
-          state=request.form['state'],
-          phone=request.form['phone'],
-          genres=request.form['genres'],
-          facebook_link=request.form['facebook_link']
-          )
-          Artist.insert(new_artist)
-          flash('Artist ' + request.form['name'] + ' was successfully listed!')
-      except SQLAlchemyError as e:
-          print(e)
-          flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed.')
+    try:
+        new_artist = Artist(
+        name=request.form['name'],
+        city=request.form['city'],
+        state=request.form['state'],
+        phone=request.form['phone'],
+        genres=request.form['genres'],
+        facebook_link=request.form['facebook_link']
+        )
+        db.session.add(new_artist)
+        db.session.commit()
+    except:
+        error = True
+        db.session.rollback()
+        print(sys.exc_info())
+    finally:
+        db.session.close()
+        if error:
+            flash('An error occurred. Artist ' + request.form['name'] + ' could not be listed.')
+        else:
+            flash('Artist ' + request.form['name'] + ' was successfully listed!')
+  return render_template('pages/home.html')
+
+
+
   # on successful db insert, flash success
   # TODO: on unsuccessful db insert, flash an error instead.
   # e.g., flash('An error occurred. Artist ' + data.name + ' could not be listed.')
-  return render_template('pages/home.html')
-
 
 #  Shows
 #  ----------------------------------------------------------------
