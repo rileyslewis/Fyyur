@@ -8,6 +8,8 @@
 		</h1>
 		<p class="subtitle">
 			ID: {{ artist.id }}
+			<span><button id="artist-edit" data-id="{{artist.id}}"><i class="fas fa-edit"></i></button>
+</span>
 		</p>
 		<div class="genres">
 			{% for genre in artist.genres %}
@@ -33,7 +35,7 @@
 				<i class="fas fa-quote-left"></i> {{ artist.seeking_description }} <i class="fas fa-quote-right"></i>
 			</div>
 		</div>
-		{% else %}	
+		{% else %}
 		<p class="not-seeking">
 			<i class="fas fa-moon"></i> Not currently seeking performance venues
 		</p>
@@ -73,4 +75,3 @@
 </section>
 
 {% endblock %}
-

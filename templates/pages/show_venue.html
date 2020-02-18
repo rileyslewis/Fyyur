@@ -7,10 +7,10 @@
 			{{ venue.name }}
 		</h1>
 		<p class="subtitle">
-			ID: {{ venue.id }}
-			<span>ID: {{venue.id}}</span>
+			<span>ID: {{venue.id}}
 			<button id="venue-edit" data-id="{{venue.id}}"><i class="fas fa-edit"></i><button>
 				<button id="delete-venue" data-id="{{venue.id}}"<i class="fas fa-trash-alt"></i></button>
+				</span>
 		</p>
 		<div class="genres">
 			{% for genre in venue.genres %}

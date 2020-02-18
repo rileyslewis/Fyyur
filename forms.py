@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask_wtf import Form
-from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField
-from wtforms.validators import DataRequired, AnyOf, URL
+from wtforms import StringField, SelectField, SelectMultipleField, DateTimeField, BooleanField
+from wtforms.validators import DataRequired, AnyOf, URL, Optional
 
 class ShowForm(Form):
     artist_id = StringField(
@@ -86,7 +86,7 @@ class VenueForm(Form):
         'phone'
     )
     image_link = StringField(
-        'image_link'
+        'image_link', validators=[URL(), Optional()]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
@@ -116,14 +116,13 @@ class VenueForm(Form):
     facebook_link = StringField(
         'facebook_link', validators=[URL()]
     )
-    seeking_talent = StringField(
-        'seeking_talent', validators=[DataRequired()]
-    )
+    seeking_talent = BooleanField('seeking_talent')
+
     seeking_description = StringField(
-        'seeking_description', validators=[DataRequired()]
+        'seeking_description'
     )
     website = StringField(
-        'website'
+        'website', validators=[URL(), Optional()]
     )
 
 
@@ -195,7 +194,7 @@ class ArtistForm(Form):
         'phone'
     )
     image_link = StringField(
-        'image_link'
+        'image_link', validators=[URL(), Optional()]
     )
     genres = SelectMultipleField(
         # TODO implement enum restriction
@@ -224,16 +223,14 @@ class ArtistForm(Form):
     )
     facebook_link = StringField(
         # TODO implement enum restriction
-        'facebook_link', validators=[URL()]
+        'facebook_link', validators=[URL(), Optional()]
     )
-    seeking_venue = StringField(
-        'seeking_venue'
-    )
+    seeking_venue = BooleanField('seeking_venue')
     seeking_description = StringField(
         'seeking_description'
     )
     website = StringField(
-        'website'
+        'website', validators=[URL(), Optional()]
     )
 
 # TODO IMPLEMENT NEW ARTIST FORM AND NEW SHOW FORM
