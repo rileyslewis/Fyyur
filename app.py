@@ -114,20 +114,22 @@ def create_venue_submission():
     # TODO: modify data to be the data object returned from db insertion
     # on successful db insert, flash success
     # flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    form = VenueForm(request.form)
-    try:
+    form = VenueForm()
+    data = {}                           # Set container standard
+    data['name'] = form.name.data       # comply my standard
+    try:                                # then interact with each form item.
         new_venue = Venue(
-        name=request.form['name'],
-        genres=request.form.getlist('genres'),
-        address=request.form['address'],
-        city=request.form['city'],
-        state=request.form['state'],
-        phone=request.form['phone'],
-        website=request.form['website'],
-        facebook_link=request.form['facebook_link'],
-        image_link=request.form['image_link'],
-        seeking_talent=request.form['seeking_talent'],
-        seeking_description=request.form['seeking_description']
+        name=form.name.data,
+        genres=form.genres.data,
+        address=form.address.data,
+        city=form.city.data,
+        state=form.state.data,
+        phone=form.phone.data,
+        website=form.website.data,
+        facebook_link=form.facebook_link.data,
+        image_link=form.image_link.data,
+        seeking_talent=form.seeking_talent.data,
+        seeking_description=form.seeking_description.data
         )
         db.session.add(new_venue)
         db.session.commit()
@@ -363,19 +365,21 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
-    form = ArtistForm(request.form)
-    try:
+    form = ArtistForm()
+    data = {}                        # Set container standard
+    data['name'] = form.name.data    # comply my standard
+    try:                             # then interact with each form item.
         new_artist = Artist(
-        name=request.form['name'],
-        city=request.form['city'],
-        state=request.form['state'],
-        phone=request.form['phone'],
-        genres=request.form.getlist('genres'),
-        website=request.form['website'],
-        image_link=request.form['image_link'],
-        seeking_venue=request.form['seeking_venue'],
-        seeking_description=request.form['seeking_description'],
-        facebook_link=request.form['facebook_link']
+        name=form.name.data,
+        city=form.city.data,
+        state=form.state.data,
+        phone=form.phone.data,
+        genres=form.genres.data,
+        website=form.website.data,
+        image_link=form.image_link.data,
+        seeking_venue=form.seeking_venue.data,
+        seeking_description=form.seeking_description.data,
+        facebook_link=form.facebook_link.data
         )
         db.session.add(new_artist)
         db.session.commit()
