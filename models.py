@@ -44,7 +44,7 @@ class Venue(db.Model):
     website = db.Column(db.String(500))
     seeking_talent = db.Column(db.Boolean(), nullable=False, default=False)
     seeking_description = db.Column(db.String(500), default='')
-    genres = db.Column(db.ARRAY(db.String))
+    genres = db.Column(db.ARRAY(db.String(120)))
     shows = db.relationship('Show', backref='Venue', lazy='dynamic')
 
 
@@ -57,7 +57,7 @@ class Artist(db.Model):
     state = db.Column(db.String(120), nullable=False)
     phone = db.Column(db.String(120))
     website = db.Column(db.String(500))
-    genres = db.Column(db.ARRAY(db.String), nullable=False)
+    genres = db.Column(db.String(120), nullable=False)
     image_link = db.Column(db.String(500))
     facebook_link = db.Column(db.String(120))
     seeking_venue = db.Column(db.Boolean(), nullable=False, default=False)

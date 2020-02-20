@@ -273,19 +273,19 @@ def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
   error = False
-  edit_artists = Artist.query.get(artist_id)
   form = ArtistForm()
   try:
-      edit_artists.name = request.form['name']
-      edit_artists.city = request.form['city']
-      edit_artists.state = request.form['phone']
+      edit_artists = Artist.query.get(artist_id)
+      edit_artists.name = form.name.data
+      edit_artists.city = form.city.data
+      edit_artists.state = form.state.data
       edit_artists.genres = request.form.getlist('genres')
-      edit_artists.facebook_link = request.form['facebook_link']
-      edit_artists.website = request.form['website']
-      edit_artists.phone = request.form['phone']
-      edit_artists.image_link = request.form['image_link']
-      edit_artists.seeking_venue = request.form['seeking_venue']
-      edit_artists.seeking_description = request.form['seeking_description']
+      edit_artists.facebook_link = form.facebook_link.data
+      edit_artists.website = form.website.data
+      edit_artists.phone = form.phone.data
+      edit_artists.image_link = form.image_link.data
+      edit_artists.seeking_venue = form.seeking_venue.data
+      edit_artists.seeking_description = form.seeking_description.data
       db.session.add(edit_artists)
       db.session.commit()
   except:
@@ -374,7 +374,7 @@ def create_artist_submission():
         city=form.city.data,
         state=form.state.data,
         phone=form.phone.data,
-        genres=form.genres.data,
+        genres=request.form.getlist('genres'),
         website=form.website.data,
         image_link=form.image_link.data,
         seeking_venue=form.seeking_venue.data,
