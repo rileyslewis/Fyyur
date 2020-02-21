@@ -7,10 +7,10 @@
 			{{ artist.name }}
 		</h1>
 		<p class="subtitle">
-			ID: {{ artist.id }}
-			<span><button id="artist-edit" data-id="{{artist.id}}"><i class="fas fa-edit"></i></button>
-</span>
-		</p>
+		<span>	ID: {{ artist.id }}</span>
+		<a href="/artists/{{artist.id}}/edit"><input type="submit" value="Edit Selected Artist" class="fas fa-edit"></a><form method="post" class="form">
+		</form>
+		<br>
 		<div class="genres">
 			{% for genre in artist.genres %}
 			<span class="genre">{{ genre }}</span>
