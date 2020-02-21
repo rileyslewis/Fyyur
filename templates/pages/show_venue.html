@@ -7,11 +7,12 @@
 			{{ venue.name }}
 		</h1>
 		<p class="subtitle">
-			<span>ID: {{venue.id}}
-			<button id="venue-edit" data-id="{{venue.id}}"><i class="fas fa-edit"></i><button>
-				<button id="delete-venue" data-id="{{venue.id}}"<i class="fas fa-trash-alt"></i></button>
-				</span>
-		</p>
+			<span>ID: {{venue.id}} </span>
+				<p>
+				<a href="/venues/{{venue.id}}/edit"><input type="submit" value="Edit Selected Venue" class="fas fa-edit"></a><form method="post" class="form">
+					<input type="submit" value="Delete Selected Venue" class="fas fa-edit">
+					</form>
+					<br>
 		<div class="genres">
 			{% for genre in venue.genres %}
 			<span class="genre">{{ genre }}</span>
@@ -79,15 +80,3 @@
 </section>
 
 {% endblock %}
-<script>
-	document.getElementById("delete-venue").onclick= function(e) {
-		const IdOfVenue = e.target.dataset['id'];
-		console.log(IdOfVenue);
-		console.log(e);
-		fetch('/venues/' + IdOfVenue, {
-			method: 'DELETE'
-		})
-		.then (response=> window.location.href='/')
-		.catch (error=> window.location.reload())
-	}
-</script>

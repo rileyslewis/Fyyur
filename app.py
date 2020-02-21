@@ -176,24 +176,26 @@ def create_venue_submission():
             # TODO: on unsuccessful db insert, flash an error instead.
             # e.g., flash('An error occurred. Venue ' + data.name + ' could not be listed.')
             # see: http://flask.pocoo.org/docs/1.0/patterns/flashing/
-@app.route('/venues/<venue_id>', methods=['DELETE'])
+@app.route('/venues/<venue_id>', methods=['POST'])
 def delete_venue(venue_id):
   # TODO: Complete this endpoint for taking a venue_id, and using
   # SQLAlchemy ORM to delete a record. Handle cases where the session commit could fail.
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
-  successful_delete = True
+  error = False
   try:
       Venue.query.filter_by(id=venue_id).delete()
       db.session.commit()
+      flash('The Venue has been deleted successfully!')
   except:
-      successful_delete = False
+      error = False
       print(sys.exc_info())
       db.session.rollback()
+      flash('Venue could not be deleted, please try again.')
   finally:
       db.session.close()
-  return jsonify({'successful_delete':successful_delete})
+  return render_template('pages/home.html')
 
 # -----------------------------------------------------------------
 #  ---------- Artists -------------
