@@ -121,7 +121,7 @@ class VenueForm(Form):
     )
 
     seeking_description = StringField(
-        'seeking_description'
+        'seeking_description', validators=[Optional()]
     )
     website = StringField(
         'website', validators=[URL(), Optional()]
@@ -229,7 +229,7 @@ class ArtistForm(Form):
     )
     seeking_venue = BooleanField('seeking_venue')
     seeking_description = StringField(
-        'seeking_description'
+        'seeking_description', validators=[Optional()]
     )
     website = StringField(
         'website', validators=[URL(), Optional()]
