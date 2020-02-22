@@ -5,7 +5,15 @@
 import json
 import dateutil.parser
 import babel
-from flask import Flask, render_template, request, Response, flash, redirect, url_for
+from flask import (
+        Flask,
+        render_template,
+        request,
+        Response,
+        flash,
+        redirect,
+        url_for
+)
 from flask_moment import Moment
 from flask_sqlalchemy import SQLAlchemy
 import logging
@@ -74,6 +82,11 @@ def search_venues():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # search for Hop should return "The Musical Hop".
   # search for "Music" should return "The Musical Hop" and "Park Square Live Music & Coffee"
+  """
+  Searches for a Venue according to any letter input
+  (Using ilike to make it case insensitive)
+  for loop in order to list items through a listed view.
+  """
   search_venue = request.form.get('search_term')
   venues = Venue.query.filter(Venue.name.ilike('%{}%'.format(search_venue))).all()
   data = []
@@ -94,10 +107,16 @@ def search_venues():
 def show_venue(venue_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
-  # result = db.session.query(Venue).filter_by(id = venue_id).first()
-  # colu = [a for a in dir(Venue) if not a.startswith('_')]
-  # data1= {col: getattr(result, col) for col in colu}
-  # data = list(filter(lambda d: d['id'] == venue_id, [data1]))[0]
+  """
+  The code below combines the model for Show with Venues & Artist in order
+  to locate all the necessary data required in order to show the past shows
+  and upcoming showing through comparing the time right now (datetime.now())
+  and the date of the show.
+  if the start time is previous to the time right now it would show appropriate
+  shows accordingly. Moreover, it provides a view to an individual Venue on its
+  dedicated page.
+
+  """
   time_atm = datetime.now()
   my_venues = Venue.query.get(venue_id)
   setattr(my_venues, 'past_shows', [])
@@ -125,7 +144,7 @@ def show_venue(venue_id):
             num_upcoming_shows += 1
     setattr(my_venues, 'num_past_shows', num_past_shows)
     setattr(my_venues, 'num_upcoming_shows', num_upcoming_shows)
-  except:
+  except Exception:
     error = True
     print(sys.exc_info())
   return render_template('pages/show_venue.html', venue=my_venues)
@@ -144,6 +163,13 @@ def create_venue_submission():
     # TODO: modify data to be the data object returned from db insertion
     # on successful db insert, flash success
     # flash('Venue ' + request.form['name'] + ' was successfully listed!')
+    """
+    Retrieves the form data submitted through the new_venue.html file and submits
+    the information onto the database. Collecting each input bar at a time then
+    committing it to the database.
+    in case of an error - requested to raise an Exception.
+
+    """
     form = VenueForm()
     data = {}                           # Set container standard
     data['name'] = form.name.data       # comply my standard
@@ -164,7 +190,7 @@ def create_venue_submission():
         db.session.add(new_venue)
         db.session.commit()
         flash('Venue ' + request.form['name'] + ' was successfully listed!')
-    except:
+    except Exception:
         error = True
         db.session.rollback()
         print(sys.exc_info())
@@ -183,12 +209,17 @@ def delete_venue(venue_id):
 
   # BONUS CHALLENGE: Implement a button to delete a Venue on a Venue Page, have it so that
   # clicking that button delete it from the db then redirect the user to the homepage
+  """
+  Lets users click on the button in the Specified venue page to delete the venue
+  once filtered by the ID of the venue in mind it commits the delete() venue
+
+  """
   error = False
   try:
       Venue.query.filter_by(id=venue_id).delete()
       db.session.commit()
       flash('The Venue has been deleted successfully!')
-  except:
+  except Exception:
       error = False
       print(sys.exc_info())
       db.session.rollback()
@@ -215,7 +246,7 @@ def artists():
             "name": artist_names,
             }
       result.append(grouping)
-  except:
+  except Exception:
       error = True
       db.session.rollback()
       print(sys.exc_info())
@@ -230,6 +261,12 @@ def search_artists():
   # TODO: implement search on artists with partial string search. Ensure it is case-insensitive.
   # seach for "A" should return "Guns N Petals", "Matt Quevado", and "The Wild Sax Band".
   # search for "band" should return "The Wild Sax Band
+    """
+    Searches for an Artist according to any letter input
+    (Using ilike to make it case insensitive)
+    for loop in order to list items through a listed view.
+    """
+
     search_artist = request.form.get('search_term')
     s_artist = Artist.query.filter(Artist.name.ilike('%{}%'.format(search_artist))).all()
     data = []
@@ -249,7 +286,16 @@ def search_artists():
 def show_artist(artist_id):
   # shows the venue page with the given venue_id
   # TODO: replace with real venue data from the venues table, using venue_id
+  """
+  The code below combines the model for Show with Venues & Artist in order
+  to locate all the necessary data required in order to show the past shows
+  and upcoming showing through comparing the time right now (datetime.now())
+  and the date of the show.
+  if the start time is previous to the time right now it would show appropriate
+  shows accordingly. Moreover, it provides a view to an individual Venue on its
+  dedicated page.
 
+  """
   time_atm = datetime.now()
   my_artists = Artist.query.get(artist_id)
   setattr(my_artists, 'past_shows', [])
@@ -277,9 +323,10 @@ def show_artist(artist_id):
             num_upcoming_shows += 1
       setattr(my_artists, 'num_past_shows', num_past_shows)
       setattr(my_artists, 'num_upcoming_shows', num_upcoming_shows)
-  except:
+  except Exception:
       error = True
       print(sys.exc_info())
+      flash('Artist Could not be found.')
   return render_template('pages/show_artist.html', artist=my_artists)
 
 # http://pytz.sourceforge.net/
@@ -288,6 +335,11 @@ def show_artist(artist_id):
 #  ----------------------------------------------------------------
 @app.route('/artists/<int:artist_id>/edit', methods=['GET'])
 def edit_artist(artist_id):
+    """
+    Retrieves previously input data from the Artist information
+    Which is available.
+
+    """
     artist = Artist.query.get(artist_id)
     form = ArtistForm(
     name = artist.name,
@@ -308,6 +360,11 @@ def edit_artist(artist_id):
 def edit_artist_submission(artist_id):
   # TODO: take values from the form submitted, and update existing
   # artist record with ID <artist_id> using the new attributes
+  """
+  Supports an edit option for a previously submitted form for the specified
+  Artist.
+
+  """
   error = False
   form = ArtistForm()
   artist = Artist.query.get(artist_id)
@@ -325,7 +382,7 @@ def edit_artist_submission(artist_id):
     db.session.add(artist)
     db.session.commit()
     flash('Artist ' + request.form['name'] + ' has been updated.')
-  except:
+  except Exception:
     error = True
     db.session.rollback()
     print(sys.exc_info())
@@ -337,6 +394,11 @@ def edit_artist_submission(artist_id):
 
   @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
   def edit_venue(venue_id):
+      """
+      Retrieves previously input data from the Venue information
+      Which is available.
+
+      """
       venue = Venue.query.get(venue_id)
       form = VenueForm(
       name = venue.name,
@@ -357,6 +419,11 @@ def edit_artist_submission(artist_id):
 def edit_venue_submission(venue_id):
   # TODO: take values from the form submitted, and update existing
   # venue record with ID <venue_id> using the new attributes
+  """
+  Supports an edit option for a previously submitted form for the specified
+  Venue.
+
+  """
   venue = Venue.query.get(venue_id)
   form = VenueForm()
   error = False
@@ -375,7 +442,7 @@ def edit_venue_submission(venue_id):
       db.session.add(venue)
       db.session.commit()
       flash('Venue ' + form.name.data + ' has been updated.')
-  except:
+  except Exception:
       error = True
       db.session.rollback()
       print(sys.exc_info())
@@ -398,6 +465,13 @@ def create_artist_submission():
   # called upon submitting the new artist listing form
   # TODO: insert form data as a new Venue record in the db, instead
   # TODO: modify data to be the data object returned from db insertion
+    """
+    Retrieves the form data submitted through the new_artist.html file and submits
+    the information onto the database. Collecting each input bar at a time then
+    committing it to the database.
+    in case of an error - requested to raise an Exception.
+
+    """
     form = ArtistForm()
     data = {}                        # Set container standard
     data['name'] = form.name.data    # comply my standard
@@ -417,7 +491,7 @@ def create_artist_submission():
         db.session.add(new_artist)
         db.session.commit()
         flash('Artist ' + request.form['name'] + ' was successfully listed!')
-    except:
+    except Exception:
         error = True
         db.session.rollback()
         print(sys.exc_info())
@@ -438,6 +512,13 @@ def shows():
   # displays list of shows at /shows
   # TODO: replace with real venues data.
   #       num_shows should be aggregated based on number of upcoming shows per venue.
+  """
+  Combines the Models (Artist, Venue, Show) data in order to provide a shared
+  model of the shows between an Artist and a Venue which the artist performs
+  at. Taking one data point at a time
+  (*show_venue_id=shows_data[0] taking ID of specified model)
+
+  """
   data = db.session.query(Show.venue_id, Venue.name, Show.artist_id, Artist.name, Artist.image_link, Show.start_time).join(Venue).join(Artist).group_by(Show.venue_id, Venue.name, Show.artist_id, Artist.name, Artist.image_link, Show.start_time).all()
   result = []
   for shows_data in data:
@@ -470,6 +551,13 @@ def create_shows():
 def create_show_submission():
   # called to create new shows in the db, upon submitting new show listing form
   # TODO: insert form data as a new Show record in the db, instead
+  """
+  Retrieves the form data submitted through the new_show.html file and submits
+  the information onto the database. Collecting each input bar at a time then
+  committing it to the database.
+  in case of an error - requested to raise an Exception.
+
+  """
   form = ShowForm(request.form)
   try:
     new_show = Show(
@@ -480,7 +568,7 @@ def create_show_submission():
     db.session.add(new_show)
     db.session.commit()
     flash('Show was successfully listed!')
-  except:
+  except Exception:
     error = True
     db.session.rollback()
     print(sys.exc_info())
