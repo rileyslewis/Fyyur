@@ -392,8 +392,8 @@ def edit_artist_submission(artist_id):
         flash('An error has occurred. Artist ' + request.form['name'] + ' couldn\'t be updated, please try again.')
     return redirect(url_for('show_artist', artist_id=artist_id))
 
-  @app.route('/venues/<int:venue_id>/edit', methods=['GET'])
-  def edit_venue(venue_id):
+@app.route('/venues/<int:venue_id>/edit', methods=['GET'])
+def edit_venue(venue_id):
       """
       Retrieves previously input data from the Venue information
       Which is available.
@@ -401,18 +401,18 @@ def edit_artist_submission(artist_id):
       """
       venue = Venue.query.get(venue_id)
       form = VenueForm(
-      name = venue.name,
-      city = venue.city,
-      state = venue.state,
-      phone = venue.phone,
-      genres = venue.genres,
-      facebook_link = venue.facebook_link,
-      website = venue.website,
-      address = venue.address,
-      image_link = venue.image_link,
-      seeking_talent = venue.seeking_talent,
-      seeking_description = venue.seeking_description
-      )
+          name = venue.name,
+          city = venue.city,
+          state = venue.state,
+          phone = venue.phone,
+          genres = venue.genres,
+          facebook_link = venue.facebook_link,
+          website = venue.website,
+          address = venue.address,
+          image_link = venue.image_link,
+          seeking_talent = venue.seeking_talent,
+          seeking_description = venue.seeking_description,
+        )
       return render_template('forms/edit_venue.html', form=form, venue=venue)
 
 @app.route('/venues/<int:venue_id>/edit', methods=['POST'])
@@ -424,33 +424,35 @@ def edit_venue_submission(venue_id):
   Venue.
 
   """
-  venue = Venue.query.get(venue_id)
-  form = VenueForm()
   error = False
+  form = VenueForm()
+  venue = Venue.query.get(venue_id)
   try:
-      venue.name = form.name.data
-      venue.city = form.city.data
-      venue.state = form.state.data
-      venue.phone = form.phone.data
-      venue.genres = form.genres.data
-      venue.facebook_link = form.facebook_link.data
-      venue.address = form.address.data
-      venue.website = form.website.data
-      venue.image_link = form.image_link.data
-      venue.seeking_talent = form.seeking_talent.data
-      venue.seeking_description = form.seeking_description.data
-      db.session.add(venue)
-      db.session.commit()
-      flash('Venue ' + form.name.data + ' has been updated.')
-  except Exception:
-      error = True
-      db.session.rollback()
-      print(sys.exc_info())
+    venue.name = form.name.data
+    venue.city = form.city.data
+    venue.state = form.state.data
+    venue.phone = form.phone.data
+    venue.genres = form.genres.data
+    venue.facebook_link = form.facebook_link.data
+    venue.address = form.address.data
+    venue.website = form.website.data
+    venue.image_link = form.image_link.data
+    venue.seeking_talent = form.seeking_talent.data
+    venue.seeking_description = form.seeking_description.data
+    db.session.add(venue)
+    db.session.commit()
+  except Exception as e:
+    db.session.rollback()
+    print(sys.exc_info())
+    error = True
   finally:
-      db.session.close()
-      if error:
-          flash('An error has occurred. Venue ' + request.form['name'] + ' couldn\'t be updated, please try again.')
-      return redirect(url_for('show_venue', venue_id=venue_id))
+    db.session.close()
+    if error:
+        flash('An error has occurred. Venue ' + request.form['name'] + ' couldn\'t be updated, please try again.')
+        return render_template('forms/edit_venue.html', form=form, venue=venue)
+    else:
+        flash('Venue ' + form.name.data + ' has been updated.')
+        return redirect(url_for('show_venue', venue_id=venue_id))
 
 #  Create Artist
 #  ----------------------------------------------------------------
@@ -589,7 +591,6 @@ def not_found_error(error):
 @app.errorhandler(500)
 def server_error(error):
     return render_template('errors/500.html'), 500
-
 
 if not app.debug:
     file_handler = FileHandler('error.log')
